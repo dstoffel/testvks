@@ -13,8 +13,7 @@ spec:
     targetRevision: HEAD
   syncPolicy:
     automated: 
-      retry:
-        limit: 20
-      automated:
-        prune: true
-        selfHeal: true
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 20
