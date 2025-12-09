@@ -15,7 +15,7 @@ spec:
     spec:
       project: "default"
       sources:
-      - repoURL: https://gitlab.com/uniluxembourg/siu/ia/vcf/tanzu-apps/ako.git
+      - repoURL: https://github.com/dstoffel/testvks.git
         targetRevision: HEAD
         path: 'apps/test/'
       destination:
