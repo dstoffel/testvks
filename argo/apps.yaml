@@ -11,3 +11,7 @@ spec:
     path: app-of-apps
     repoURL: https://github.com/dstoffel/testvks.git
     targetRevision: HEAD
+  syncPolicy:
+    automated:
+      enabled: true
+
