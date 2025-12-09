@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argo-config
+  namespace: test
+spec:
+  destination:
+    server: https://172.60.60.3:443
+  project: default
+  source:
+    path: app-of-apps
+    repoURL: https://github.com/dstoffel/testvks.git
+    targetRevision: HEAD

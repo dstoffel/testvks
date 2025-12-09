@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: test
+  namespace: test
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - clusters:
+      selector: {}
+  template:
+    metadata:
+      name: '{{.name}}-test'
+    spec:
+      project: "default"
+      sources:
+      - repoURL: https://gitlab.com/uniluxembourg/siu/ia/vcf/tanzu-apps/ako.git
+        targetRevision: HEAD
+        path: 'apps/test/'
+      destination:
+        name: '{{ .name }}'
+        namespace: test
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        managedNamespaceMetadata:
+          labels:
+            pod-security.kubernetes.io/enforce: privileged
+        syncOptions:
+        - CreateNamespace=true
