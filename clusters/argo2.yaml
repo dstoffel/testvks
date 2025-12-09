@@ -13,7 +13,9 @@ spec:
     serviceDomain: "cluster.local"
   #specify the topology for the cluster
   topology:
-    class: builtin-generic-v3.3.0
+    classRef:
+      name: builtin-generic-v3.5.0
+      namespace: vmware-system-vks-public
     version: v1.32
     controlPlane:
       replicas: 1
