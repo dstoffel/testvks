@@ -11,3 +11,5 @@ spec:
     path: clusters
     repoURL: https://github.com/dstoffel/testvks.git
     targetRevision: HEAD
+  syncPolicy:
+    automated: {}
