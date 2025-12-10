@@ -7,8 +7,10 @@ spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
   generators:
-  - clusters:
-      selector: {}
+  - clusters: 
+      selector:
+        matchLabels:
+          argocd/sync-supervisor: "true"
   template:
     metadata:
       name: '{{.name}}-test'
