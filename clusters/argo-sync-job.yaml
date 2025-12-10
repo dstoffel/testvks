@@ -28,4 +28,11 @@ spec:
           - name: ARGOCD_NS
             value: "test"
           - name: CLUSTERS_NS
-            value: "test,test2"
+            value: "test,test2" # * for all namespace, require additional perms
+#        volumeMounts:
+#          - name: kubeconfig
+#            mountPath: /root/.kube
+#      volumes:
+#        - name: kubeconfig
+#          secret:
+#            secretName: "merged-kubeconfig-supervisor-argo"
