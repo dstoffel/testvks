@@ -16,7 +16,7 @@ SUPERVISOR_CONTEXT = os.getenv("SUPERVISOR_CONTEXT", "")
 ARGOCD_CONTEXT = os.getenv("ARGOCD_CONTEXT", "argocd")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 INSECURE = True if os.getenv("INSECURE", False) == "true" else False
-VKS_NS = os.getenv("VKS_NS", "")
+CLUSTERS_NS = os.getenv("CLUSTERS_NS", "*")
 
 
 logging.basicConfig(
@@ -39,13 +39,14 @@ def run(cmd):
 
 def get_capi_clusters():
     allclusters = []
-    for NS in VKS_NS.split(','):
-        data = run(f"kubectl --context={SUPERVISOR_CONTEXT} get clusters -n {NS} -l {SYNC_LABEL}=true -o json")
+    for NS in CLUSTERS_NS.split(','):
+        opt = '-A' if CLUSTERS_NS == '*' else f'-n {NS}'
+        data = run(f"kubectl --context={SUPERVISOR_CONTEXT} get clusters {opt} -l {SYNC_LABEL}=true -o json")
         clusters = json.loads(data)["items"]
         nb=len(clusters)
         names = ','.join([n['metadata']['name'] for n in clusters])
         allclusters = allclusters + clusters
-        log.info(f'Cluster VKS[{SYNC_LABEL}=true/{NS}] : {nb} ({names})')
+        log.info(f'Cluster CAPI[{SYNC_LABEL}=true/{NS}] : {nb} ({names})')
     return allclusters
 
 def get_argocd_clusters():
@@ -158,14 +159,7 @@ def cleanup_argocd_clusters(capi_clusters, argocd_clusters):
             run(f"kubectl --context={ARGOCD_CONTEXT} delete secret {secret_name} -n {ARGOCD_NS}")
 
 def main():
-    log.info(f'Syncing clusters, SUPERVISOR_CONTEXT={SUPERVISOR_CONTEXT}, ARGOCD_CONTEXT={ARGOCD_CONTEXT}, VKS_NS={VKS_NS}')
-
-    if VKS_NS == False:
-        log.error('VKS_NS is required: comma-separated vpshere namespaces, used to find vks clusters')
-        sys.exit(1)
-
-    if SUPERVISOR_CONTEXT == '' or ARGOCD_CONTEXT == '':
-        log.info('SUPERVISOR_CONTEXT or ARGOCD_CONTEXT empty, in-cluster')
+    log.info(f'Syncing clusters, SUPERVISOR_CONTEXT={SUPERVISOR_CONTEXT}, ARGOCD_CONTEXT={ARGOCD_CONTEXT}, CLUSTERS_NS={CLUSTERS_NS}')
 
     capi_clusters = get_capi_clusters()
     argocd_clusters = get_argocd_clusters()
