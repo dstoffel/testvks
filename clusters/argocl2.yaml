@@ -1,8 +1,10 @@
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
-  ame: argo2
+  name: argo2
   namespace: test2
+  labels:
+    argocd/sync-supervisor: "true"
 spec:
   clusterNetwork:
     pods:
