@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   namespace: test
-  generateName: "sync-vks-argo-"
+  generateName: "sync-capi-argo-"
   annotations:
     argocd.argoproj.io/hook: PostSync,PostDelete
 spec:
@@ -27,5 +27,5 @@ spec:
             value: "true"
           - name: ARGOCD_NS
             value: "test"
-          - name: VKS_NS
+          - name: CLUSTERS_NS
             value: "test,test2"
