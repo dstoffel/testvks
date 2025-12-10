@@ -15,7 +15,7 @@ spec:
       cidrBlocks:
       - 172.15.0.0/16
   topology:
-    clusterClass: builtin-generic-v3.4.0
+    class: builtin-generic-v3.4.0
     controlPlane:
       replicas: 1
     variables:
