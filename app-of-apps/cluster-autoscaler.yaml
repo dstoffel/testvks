@@ -30,7 +30,7 @@ spec:
       sources:
       - repoURL: https://github.com/dstoffel/testvks.git 
         targetRevision: HEAD
-        path: 'kustomize'
+        path: 'apps/cluster-autoscaler'
         kustomize:
           patches:
           - target:
