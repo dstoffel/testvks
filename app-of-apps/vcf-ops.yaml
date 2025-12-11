@@ -15,7 +15,6 @@ spec:
     metadata:
       name: '{{.name}}-vcf-ops'
       labels:
-        supervisorNamespace: '{{.values.supervisorns }}'
         app: vcf-ops
     spec:
       project: "default"
