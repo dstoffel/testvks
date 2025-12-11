@@ -1,0 +1,168 @@
+apiVersion: packaging.carvel.dev/v1alpha1
+kind: PackageInstall
+metadata:
+  name: fluent-bit
+  namespace: tkg-system
+spec:
+  packageRef:
+    refName: fluent-bit.kubernetes.vmware.com
+    versionSelection:
+      constraints: 4.0.8+vmware.1-vks.1
+      prereleases: {}
+  serviceAccountName: fluent-bit-tkg-system-sa
+  values:
+  - secretRef:
+      name: fluent-bit-tkg-system-values
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fluent-bit-tkg-system-sa
+  namespace: tkg-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: fluent-bit-tkg-system-cluster-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: fluent-bit-tkg-system-sa
+  namespace: tkg-system
+---
+apiVersion: v1
+stringData:
+  values.yaml: |
+    ---
+    fluent_bit:
+      config:
+        service: |
+          [Service]
+            Flush         1
+            Log_Level     info
+            Daemon        off
+            Parsers_File  parsers.conf
+            HTTP_Server   On
+            HTTP_Listen   0.0.0.0
+            HTTP_Port     2020
+        outputs: |
+          [OUTPUT]
+            Name          http
+            Match         *
+            Host          vc-l-01a.corp.internal
+            Port          9543
+            URI           api/v2/events
+            Format        json
+            tls           on
+            tls.debug     4
+            tls.verify    off
+            json_date_key timestamp
+        inputs: |
+          [INPUT]
+            Name              tail
+            Tag               kube.*
+            Path              /var/log/containers/*.log
+            Parser            cri
+            DB                /var/log/flb_kube.db
+            Mem_Buf_Limit     50MB
+            Skip_Long_Lines   On
+            Refresh_Interval  10
+          [INPUT]
+            Name                systemd
+            Tag                 kube_systemd.*
+            Path                /var/log/journal
+            DB                  /var/log/flb_kube_systemd.db
+            Systemd_Filter      _SYSTEMD_UNIT=kubelet.service
+            Systemd_Filter      _SYSTEMD_UNIT=containerd.service
+            Read_From_Tail      On
+            Strip_Underscores   On
+          [INPUT]
+            Name              tail
+            Tag               apiserver_audit.*
+            Parser            json
+            Path              /var/log/kubernetes/kube-apiserver.log
+            DB                /var/log/flb_kube_audit.db
+            Mem_Buf_Limit     50MB
+            Refresh_Interval  10
+            Skip_Long_Lines   On
+          [INPUT]
+            Name              tail
+            Tag               auth.*
+            Path              /var/log/audit/auth.log
+            Parser            authlog
+            DB                /var/log/flb_system_auth.db
+            Mem_Buf_Limit     50MB
+            Refresh_Interval  10
+            Skip_Long_Lines   On
+        filters: |
+          [FILTER]
+            Name                kubernetes
+            Match               kube.*
+            Kube_URL            https://kubernetes.default.svc:443
+            Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
+            Kube_Tag_Prefix     kube.var.log.containers.
+            Merge_Log           On
+            Merge_Log_Key       log_processed
+            K8S-Logging.Parser  On
+            K8S-Logging.Exclude On
+          [FILTER]
+            Name                  modify
+            Match                 kube.*
+            Add                   text "K8s Container Logs"
+            Copy                  kubernetes k8s
+          [FILTER]
+            Name                  nest
+            Match                 kube.*
+            Operation             lift
+            Nested_Under          kubernetes
+          [FILTER]
+            Name                  modify
+            Match                 kube.*
+            Add                   text "K8s Container logs"
+          [FILTER]
+            Name                  modify
+            Match                 kube_systemd.*
+            Add                   text "Linux Daemon Logs"
+          [FILTER]
+            Name                  modify
+            Match                 auth.*
+            Add                   text "Linux Auth Logs"
+          [FILTER]
+            Name                  modify
+            Match                 apiserver_audit.*
+            Add                   text "Kubernetes API Server Audit Logs"
+        parsers: |
+          [PARSER]
+            Name cri
+            Format regex
+            Regex ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>[^ ]*) (?<message>.*)$
+            Time_Key    time
+            Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+          [PARSER]
+            Name        authlog
+            Format      regex
+            Regex       ^(?<time>[^ ]* {1,2}*) (?<host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$
+            Time_Key    time
+            Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+            Time_Keep   On
+          [PARSER]
+            Name   json
+            Format json
+            Time_Key time
+            Time_Format %d/%b/%Y:%H:%M:%S %z
+        streams: ""
+        plugins: ""
+      daemonset:
+        env: []
+        resources: {}
+        podAnnotations: {}
+kind: Secret
+metadata:
+  name: fluent-bit-tkg-system-values
+  namespace: tkg-system
+type: Opaque
+

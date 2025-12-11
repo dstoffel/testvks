@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-autoscaler
+  namespace: test
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - clusters:
+      selector:
+        matchLabels:
+          argocd.argoproj.io/kubernetes-version: "1.33"
+          argocd/cluster-autoscaler: enabled
+      values:
+        version: 1.32.1+vmware.1-tkg.2
+        supervisorns: '{{index .metadata.labels "argocd/supervisor-namespace"}}'
+        clustername: '{{index .metadata.labels "argocd/cluster-name"}}'
+        supervisorctx: '{{index .metadata.labels "argocd/supervisor-context"}}'
+  template:
+    metadata:
+      name: '{{.name}}-cluster-autoscaler'
+      labels:
+        supervisorNamespace: '{{.values.supervisorns }}'
+        supervisorContext: '{{ .values.supervisorctx }}'
+        env: '{{.values.env }}'
+        app: cluster-autoscaler
+    spec:
+      project: "default"
+      sources:
+      - repoURL: https://github.com/dstoffel/testvks.git 
+        targetRevision: HEAD
+        path: 'kustomize'
+        kustomize:
+          patches:
+          - target:
+              kind: PackageInstall
+              name: autoscaler
+            patch: |-
+              - op: replace
+                path: /spec/packageRef/versionSelection/constraints
+                value: '{{.values.version}}'
+          - target:
+              kind: Secret
+              name: autoscaler-data-values
+            patch: |-
+              - op: replace
+                path: /stringData/values.yml
+                value: "---\narguments:\n  ignoreDaemonsetsUtilization: true\n  maxNodeProvisionTime: 15m\n  maxNodesTotal: 0\n  metricsPort: 8085\n  scaleDownDelayAfterAdd: 5m\n  scaleDownDelayAfterDelete: 10s\n  scaleDownDelayAfterFailure: 3m\n  scaleDownUnneededTime: 5m\nclusterConfig:\n  clusterName: \"{{.values.clustername}}\"\n  clusterNamespace: \"{{.values.supervisorns }}\"\npaused: false\n"
+      destination:
+        name: '{{ .name }}'
+        namespace: tkg-system
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

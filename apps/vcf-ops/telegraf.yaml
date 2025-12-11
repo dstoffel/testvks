@@ -1,0 +1,47 @@
+apiVersion: packaging.carvel.dev/v1alpha1
+kind: PackageInstall
+metadata:
+  name: telegraf
+  namespace: tkg-system
+spec:
+  packageRef:
+    refName: telegraf.kubernetes.vmware.com
+    versionSelection:
+      constraints: 1.35.4+vmware.1-vks.1
+      prereleases: {}
+  serviceAccountName: telegraf-tkg-system-sa
+  values:
+  - secretRef:
+      name: telegraf-tkg-system-values
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: telegraf-tkg-system-sa
+  namespace: tkg-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: telegraf-tkg-system-cluster-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: telegraf-tkg-system-sa
+  namespace: tkg-system
+---
+apiVersion: v1
+stringData:
+  values.yaml: |
+    ---
+    isMetricProxyConfigured: true
+    domainName: cluster.local
+kind: Secret
+metadata:
+  name: telegraf-tkg-system-values
+  namespace: tkg-system
+type: Opaque
+

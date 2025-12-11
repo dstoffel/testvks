@@ -1,0 +1,55 @@
+apiVersion: packaging.carvel.dev/v1alpha1
+kind: PackageInstall
+metadata:
+  name: prometheus
+  namespace: tkg-system
+spec:
+  packageRef:
+    refName: prometheus.kubernetes.vmware.com
+    versionSelection:
+      constraints: 3.5.0+vmware.1-vks.2
+      prereleases: {}
+  serviceAccountName: prometheus-tkg-system-sa
+  values:
+  - secretRef:
+      name: prometheus-tkg-system-values
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-tkg-system-sa
+  namespace: tkg-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus-tkg-system-cluster-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: prometheus-tkg-system-sa
+  namespace: tkg-system
+---
+apiVersion: v1
+stringData:
+  values.yaml: |
+    ---
+    prometheus:
+      pvc:
+        accessMode: ReadWriteOnce
+        storage: 5Gi
+        storageClassName: vc-l-01a-cl01-vsan-storage-policy
+    alertmanager:
+      pvc:
+        accessMode: ReadWriteOnce
+        storage: 5Gi
+        storageClassName: vc-l-01a-cl01-vsan-storage-policy
+kind: Secret
+metadata:
+  name: prometheus-tkg-system-values
+  namespace: tkg-system
+type: Opaque
+

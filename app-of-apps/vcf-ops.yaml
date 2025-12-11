@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: vcf-ops
+  namespace: test
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - clusters:
+      selector:
+        matchLabels:
+          argocd/sync-supervisor: "true"
+  template:
+    metadata:
+      name: '{{.name}}-vcf-ops'
+      labels:
+        supervisorNamespace: '{{.values.supervisorns }}'
+        app: vcf-ops
+    spec:
+      project: "default"
+      sources:
+      - repoURL: https://repo-url
+        targetRevision: HEAD
+        path: 'apps/vcf-ops/'
+      destination:
+        name: '{{ .name }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+

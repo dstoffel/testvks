@@ -117,8 +117,7 @@ def sync_argocd_secret(cluster):
         "argocd.argoproj.io/auto-label-cluster-info": "true",
         "argocd/supervisor-namespace": namespace,
         "argocd/supervisor-context": SUPERVISOR_CONTEXT,
-        "argocd/vsphere-namespace": namespace,
-        "argocd/vsphere-context": SUPERVISOR_CONTEXT
+        "argocd/cluster-name": name
     }
 
     for k, v in cluster["metadata"].get("labels", {}).items():

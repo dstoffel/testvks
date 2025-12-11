@@ -1,0 +1,9 @@
+apiVersion: packaging.carvel.dev/v1alpha1
+kind: PackageRepository
+metadata:
+  name: vmware-standard
+  namespace: tkg-system
+spec:
+  fetch:
+    imgpkgBundle:
+      image: "projects.packages.broadcom.com/vsphere/supervisor/packages/2025.10.22/vks-standard-packages:3.5.0-20251022"

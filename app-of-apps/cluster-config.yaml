@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-config
+  namespace: test
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - clusters: 
+      selector:
+        matchLabels:
+          argocd/sync-supervisor: "true"
+  template:
+    metadata:
+      name: '{{.name}}-cluster-config'
+    spec:
+      project: "default"
+      sources:
+      - repoURL: https://github.com/dstoffel/testvks.git
+        targetRevision: HEAD
+        path: 'common/manifests/'
+      destination:
+        name: '{{ .name }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        - CreateNamespace=true
