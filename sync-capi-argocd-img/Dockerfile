@@ -3,7 +3,7 @@ FROM ubuntu:noble
 
 COPY kubectl /usr/local/bin/kubectl
 
-RUN apt-get update && apt-get install -y curl python3 python3-yaml
+RUN apt-get update && apt-get install -y curl python3 python3-yaml yq
 
 RUN chmod +x /usr/local/bin/kubectl
 

@@ -7,6 +7,7 @@ import logging
 import base64
 import tempfile
 import sys
+import re
 
 CAPI_ADMIN_SECRET_SUFFIX = "-kubeconfig"
 ARGOCD_NS = os.getenv("ARGOCD_NS", "argo-cd")
@@ -17,6 +18,7 @@ ARGOCD_CONTEXT = os.getenv("ARGOCD_CONTEXT", "argocd")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 INSECURE = True if os.getenv("INSECURE", False) == "true" else False
 CLUSTERS_NS = os.getenv("CLUSTERS_NS", "*")
+SYNC_SECRETS = os.getenv("SYNC_SECRETS","")
 
 
 logging.basicConfig(
@@ -149,7 +151,25 @@ def sync_argocd_secret(cluster):
     log.debug(f"Secret ArgoCD {name} synchronisé avec {len(labels)} labels")
 
 
-
+def sync_secrets(capi_clusters):
+    for secret in SYNC_SECRETS.split(','):
+        if not re.match(r'^[a-z0-9-]+:[a-z0-9-]+$', secret):
+            log.error(f'Syncing secret from supervisor:{ARGOCD_NS}/{secret} invalid format "{secret}", should be "secretname:destination-namespace"')
+            continue
+        secretname = secret.split(':')[0]
+        secretns = secret.split(':')[1]
+        try:
+            secretjson = run(f"kubectl --context={SUPERVISOR_CONTEXT} get secret -n {ARGOCD_NS} {secretname} -o yaml > /tmp/secret-{secretname}.yaml")
+        except:
+            log.error(f'Syncing secret from supervisor:{ARGOCD_NS}/{secretname} missing, skipping')
+            continue
+        # nice optimization
+        for cluster in capi_clusters:
+            clustername = cluster["metadata"]["name"]
+            clusternamespace = cluster["metadata"]["namespace"]
+            log.info(f'Syncing secret from supervisor:{ARGOCD_NS}/{secretname} to {clustername}:{secretns}/{secretname}')
+            run(f"kubectl --context={SUPERVISOR_CONTEXT} get secret -n {clusternamespace} {clustername}-kubeconfig -o jsonpath='{{.data.value}}' | base64 -d  > /tmp/kubeconfig-{clusternamespace}-{clustername}")
+            run(f"cat /tmp/secret-{secretname}.yaml |  yq 'del(.metadata.uid, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.managedFields, .metadata.annotations.\"kubectl.kubernetes.io/last-applied-configuration\", .metadata.namespace)' | KUBECONFIG=/tmp/kubeconfig-{clusternamespace}-{clustername} kubectl apply -f - -n {secretns} ")
 
 def cleanup_argocd_clusters(capi_clusters, argocd_clusters):
     capi_names = {f'{c['metadata']['namespace']}-{c['metadata']['name']}' for c in capi_clusters}
@@ -169,6 +189,7 @@ def main():
         sync_argocd_secret(cluster)
 
     cleanup_argocd_clusters(capi_clusters, argocd_clusters)
+    sync_secrets(capi_clusters)
     log.info("Clusters synced")
 
 if __name__ == "__main__":
