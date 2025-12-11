@@ -1,0 +1,49 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: argo1
+  namespace: test
+  labels:
+    argocd/sync-supervisor: "true"
+    argocd/cluster-autoscaler: enabled
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 172.14.0.0/16
+    serviceDomain: cluster.local
+    services:
+      cidrBlocks:
+      - 172.15.0.0/16
+  topology:
+    class: builtin-generic-v3.4.0
+    controlPlane:
+      replicas: 1
+    variables:
+    - name: vsphereOptions
+      value:
+        persistentVolumes:
+          availableStorageClasses:
+          - vc-l-01a-cl01-vsan-storage-policy
+          availableVolumeSnapshotClasses:
+          - vc-l-01a-cl01-vsan-storage-policy
+          defaultStorageClass: vc-l-01a-cl01-vsan-storage-policy
+          defaultVolumeSnapshotClass: vc-l-01a-cl01-vsan-storage-policy
+    - name: vmClass
+      value: best-effort-medium
+    - name: storageClass
+      value: vc-l-01a-cl01-vsan-storage-policy
+    - name: kubernetes
+      value:
+        certificateRotation:
+          enabled: true
+          renewalDaysBeforeExpiry: 90
+    version: v1.33
+    workers:
+      machineDeployments:
+      - class: node-pool
+        name: node-pool-1
+        metadata:
+          annotations:
+            cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "1"
+            cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "3"
