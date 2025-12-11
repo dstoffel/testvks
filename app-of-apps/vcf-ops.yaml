@@ -19,7 +19,7 @@ spec:
     spec:
       project: "default"
       sources:
-      - repoURL: https://repo-url
+      - repoURL: https://github.com/dstoffel/testvks.git
         targetRevision: HEAD
         path: 'apps/vcf-ops/'
       destination:
