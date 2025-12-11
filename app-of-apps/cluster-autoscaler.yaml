@@ -13,7 +13,7 @@ spec:
           argocd.argoproj.io/kubernetes-version: "1.33"
           argocd/cluster-autoscaler: enabled
       values:
-        version: 1.32.1+vmware.1-tkg.2
+        version: 1.33.0+vmware.2-vks.1
         supervisorns: '{{index .metadata.labels "argocd/supervisor-namespace"}}'
         clustername: '{{index .metadata.labels "argocd/cluster-name"}}'
         supervisorctx: '{{index .metadata.labels "argocd/supervisor-context"}}'
