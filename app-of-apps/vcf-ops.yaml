@@ -10,7 +10,7 @@ spec:
   - clusters:
       selector:
         matchLabels:
-          argocd/sync-supervisor: "true"
+          argocd/sync-supervisor: "disable"
   template:
     metadata:
       name: '{{.name}}-vcf-ops'
