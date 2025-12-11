@@ -1,0 +1,56 @@
+#autoscaler.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: autoscaler-sa
+  namespace: tkg-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: autoscaler-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: autoscaler-sa
+    namespace: tkg-system
+---
+apiVersion: packaging.carvel.dev/v1alpha1
+kind: PackageInstall
+metadata:
+  name: autoscaler
+  namespace: tkg-system
+spec:
+  serviceAccountName: autoscaler-sa
+  packageRef:
+    refName: cluster-autoscaler.tanzu.vmware.com
+    versionSelection:
+      constraints: 1.29.5+vmware.2-tkg.1
+  values:
+  - secretRef:
+      name: autoscaler-data-values
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: autoscaler-data-values
+  namespace: tkg-system
+stringData:
+  values.yml: |
+    ---
+    arguments:
+      ignoreDaemonsetsUtilization: true
+      maxNodeProvisionTime: 15m
+      maxNodesTotal: 0
+      metricsPort: 8085
+      scaleDownDelayAfterAdd: 5m
+      scaleDownDelayAfterDelete: 10s
+      scaleDownDelayAfterFailure: 3m
+      scaleDownUnneededTime: 5m
+    clusterConfig:
+      clusterName: "infra-autoscale"
+      clusterNamespace: "infra-siu"
+    paused: false
