@@ -6,7 +6,7 @@ metadata:
   labels:
     argocd/sync-supervisor: "true"
     argocd/cluster-autoscaler: enabled
-    qq: qazeq
+    q: qazeq
 spec:
   clusterNetwork:
     pods:
