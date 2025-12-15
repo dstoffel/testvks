@@ -12,8 +12,8 @@ spec:
     repoURL: https://github.com/dstoffel/testvks.git
     targetRevision: HEAD
   syncPolicy:
-    automated: 
-      prune: true
-      selfHeal: true
+    #    automated: 
+    #  prune: true
+    #  selfHeal: true
     retry:
       limit: 20
