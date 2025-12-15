@@ -30,7 +30,7 @@ spec:
           - name: CLUSTERS_NS
             value: "test,test2" # * for all namespace, require additional perms
           - name: SYNC_SECRETS 
-            value: "default-registry-creds:kube-system,imported-sealed-secrets-key:kube-system"
+            value: "default-registry-creds:kube-system,imported-sealed-secrets-key:kube-system,vault-approle:kube-system"
 #        volumeMounts:
 #          - name: kubeconfig
 #            mountPath: /root/.kube

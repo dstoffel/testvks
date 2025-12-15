@@ -6,7 +6,6 @@ metadata:
   labels:
     argocd/sync-supervisor: "true"
     argocd/cluster-autoscaler: enabled
-    aze: azaz
 spec:
   clusterNetwork:
     pods:
