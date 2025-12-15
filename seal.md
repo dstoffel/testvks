@@ -1,7 +1,8 @@
 # on supervisor in argo NS:
 
 openssl req -x509 -nodes -newkey rsa:4096 -keyout sealed-secrets.key -out sealed-secrets.crt -days 3650 -subj "/CN=sealed-secrets"
-k create secret tls imported-sealed-secrets-key --key=sealed-secrets.key --cert=sealed-secrets.crt  -n kube-system
+k create secret tls imported-sealed-secrets-key --key=sealed-secrets.key --cert=sealed-secrets.crt  -n test
+k label secret -n test  imported-sealed-secrets-key sealedsecrets.bitnami.com/sealed-secrets-key=active
 
 
 # sync secret from supervisor to vks using jobs:

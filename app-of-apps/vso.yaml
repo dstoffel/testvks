@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: vault-secrets-operator
+  namespace: test
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - clusters: 
+      selector:
+        matchLabels:
+          argocd/sync-supervisor: "true"
+  template:
+    metadata:
+      name: '{{.name}}-vso'
+    spec:
+      project: "default"
+      sources:
+      - repoURL: https://github.com/dstoffel/testvks.git
+        targetRevision: HEAD
+        path: 'apps/vault-secrets-operator/'
+      destination:
+        name: '{{ .name }}'
+        namespace: vault-secrets-operator
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
