@@ -14,7 +14,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: argocd-capi-sync
-        image: dstoffelitq/sync-capi-argocd:0.10
+        image: dstoffelitq/sync-capi-argocd:0.11
         #command: ["sleep", "3600"]
         env:
           - name: LOG_LEVEL
@@ -30,7 +30,7 @@ spec:
           - name: CLUSTERS_NS
             value: "test,test2" # * for all namespace, require additional perms
           - name: SYNC_SECRETS 
-            value: "default-registry-creds:kube-system,imported-sealed-secrets-key:kube-system,vault-approle:kube-system"
+            value: "default-registry-creds:kube-system,imported-sealed-secrets-key:kube-system,vault-approle:kube-system,vault-approle:nonexist"
 #        volumeMounts:
 #          - name: kubeconfig
 #            mountPath: /root/.kube

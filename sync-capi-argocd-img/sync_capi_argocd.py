@@ -169,6 +169,7 @@ def sync_secrets(capi_clusters):
             clusternamespace = cluster["metadata"]["namespace"]
             log.info(f'Syncing secret from supervisor:{ARGOCD_NS}/{secretname} to {clustername}:{secretns}/{secretname}')
             run(f"kubectl --context={SUPERVISOR_CONTEXT} get secret -n {clusternamespace} {clustername}-kubeconfig -o jsonpath='{{.data.value}}' | base64 -d  > /tmp/kubeconfig-{clusternamespace}-{clustername}")
+            run(f"KUBECONFIG=/tmp/kubeconfig-{clusternamespace}-{clustername} kubectl get ns {secretns} || KUBECONFIG=/tmp/kubeconfig-{clusternamespace}-{clustername} kubectl create namespace {secretns}")
             run(f"cat /tmp/secret-{secretname}.yaml |  yq 'del(.metadata.uid, .metadata.resourceVersion, .metadata.creationTimestamp, .metadata.managedFields, .metadata.annotations.\"kubectl.kubernetes.io/last-applied-configuration\", .metadata.namespace)' | KUBECONFIG=/tmp/kubeconfig-{clusternamespace}-{clustername} kubectl apply -f - -n {secretns} ")
 
 def cleanup_argocd_clusters(capi_clusters, argocd_clusters):
