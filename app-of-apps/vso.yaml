@@ -10,7 +10,7 @@ spec:
   - clusters: 
       selector:
         matchLabels:
-          argocd/sync-supervisor: "true"
+          argocd/vso: enabled
   template:
     metadata:
       name: '{{.name}}-vso'

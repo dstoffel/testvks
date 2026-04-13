@@ -18,7 +18,7 @@ spec:
       cidrBlocks:
       - 172.15.0.0/16
   topology:
-    class: builtin-generic-v3.4.0
+    class: builtin-generic-v3.6.0
     controlPlane:
       replicas: 1
     variables:
@@ -26,21 +26,21 @@ spec:
       value:
         persistentVolumes:
           availableStorageClasses:
-          - vc-l-01a-cl01-vsan-storage-policy
+          - vc-vcf9-mgmt-cl01-vsan-storage-policy
           availableVolumeSnapshotClasses:
-          - vc-l-01a-cl01-vsan-storage-policy
-          defaultStorageClass: vc-l-01a-cl01-vsan-storage-policy
-          defaultVolumeSnapshotClass: vc-l-01a-cl01-vsan-storage-policy
+          - vc-vcf9-mgmt-cl01-vsan-storage-policy
+          defaultStorageClass: vc-vcf9-mgmt-cl01-vsan-storage-policy
+          defaultVolumeSnapshotClass: volumesnapshotclass-delete
     - name: vmClass
       value: best-effort-medium
     - name: storageClass
-      value: vc-l-01a-cl01-vsan-storage-policy
+      value: vc-vcf9-mgmt-cl01-vsan-storage-policy
     - name: kubernetes
       value:
         certificateRotation:
           enabled: true
           renewalDaysBeforeExpiry: 90
-    version: v1.33
+    version: v1.33.6
     workers:
       machineDeployments:
       - class: node-pool

@@ -10,7 +10,7 @@ spec:
   - clusters: 
       selector:
         matchLabels:
-          argocd/sync-supervisor: "true"
+          argocd/config: enabled
   template:
     metadata:
       name: '{{.name}}-cluster-config'
