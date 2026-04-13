@@ -10,7 +10,7 @@ spec:
   - clusters: 
       selector:
         matchLabels:
-          argocd-syn-label/nginx-demo: enabled
+          argocd-sync-label/nginx-demo: enabled
   template:
     metadata:
       name: '{{.name}}-nginx-demo'
