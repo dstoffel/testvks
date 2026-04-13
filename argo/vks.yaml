@@ -2,10 +2,10 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: vks-clusters
-  namespace: test
+  namespace: ns1
 spec:
   destination:
-    server: https://172.60.60.3:443
+    name: supervisor
   project: default
   source:
     path: clusters
