@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: nginx-demo
+  namespace: ns1
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - clusters: 
+      selector:
+        matchLabels:
+          argocd-syn-label/nginx-demo: enabled
+  template:
+    metadata:
+      name: '{{.name}}-nginx-demo'
+    spec:
+      project: "default"
+      sources:
+      - repoURL: https://github.com/dstoffel/testvks.git
+        targetRevision: HEAD
+        path: 'apps/nginx-demo'
+      destination:
+        name: '{{ .name }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

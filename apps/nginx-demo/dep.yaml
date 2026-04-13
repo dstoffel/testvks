@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: privileged
+---
+# 2. Déploiement Nginx
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: privileged
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: privileged
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80         # Port exposé par le LoadBalancer
+      targetPort: 80   # Port du conteneur
+  type: LoadBalancer
