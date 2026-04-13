@@ -4,7 +4,8 @@ metadata:
   name: argo1
   namespace: ns1
   labels:
-    argocd/sync-supervisor: "true"
+    argocd-sync/enabled: "true"
+    argocd-sync-label/customlabel: "test"
 spec:
   clusterNetwork:
     pods:
