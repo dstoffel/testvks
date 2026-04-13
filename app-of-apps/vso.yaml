@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: vault-secrets-operator
-  namespace: test
+  namespace: ns1
 spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
